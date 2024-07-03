@@ -3,15 +3,15 @@
 <br>
 
 ### ゲームのURL
-[SkyThreader(unityroom)](https://unityroom.com/games/skythreader){:target=”_blank”}
+[SkyThreader(unityroom)](https://unityroom.com/games/skythreader)
 
 <br>
 
 ---
 ### 使用したもの
-- [Unity](https://unity.com/ja){:target="_blank"}
-- [Customizable skybox](https://assetstore.unity.com/packages/2d/textures-materials/sky/customizable-skybox-174576){:target=”_blank”}: Unityアセット。背景に使用
-- [Blender](https://www.blender.jp/){:target=”_blank”}: プレイヤーのモデリング及びアニメーション作成
+- [Unity](https://unity.com/ja)
+- [Customizable skybox](https://assetstore.unity.com/packages/2d/textures-materials/sky/customizable-skybox-174576): Unityアセット。背景に使用
+- [Blender](https://www.blender.jp/): プレイヤーの鳥のモデリング及びアニメーション作成
 
 <br>
 
