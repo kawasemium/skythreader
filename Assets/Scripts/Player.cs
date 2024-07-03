@@ -1,3 +1,11 @@
+/*========================================
+
+    static class Player
+        プレイヤーに持たせるクラスです。
+        アニメーション処理や衝突処理があります。
+
+========================================*/
+
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -14,11 +22,10 @@ public class Player : MonoBehaviour
     float decayDegree;
 
     bool isFlapping;
-    [SerializeField] bool isInvincible;
+    [SerializeField] bool isInvincible;//未使用
 
     void Start()
     {
-        //Timer timer = new Timer();
         bird=GameObject.Find("bird");
         animator=bird.GetComponent<Animator>();
         general=GameObject.Find("General").GetComponent<General>();

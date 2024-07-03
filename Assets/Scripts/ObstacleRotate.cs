@@ -1,3 +1,10 @@
+/*========================================
+
+    public class ObstacleRotate
+        回転する細長い障害物に持たせるクラスです。
+
+========================================*/
+
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;

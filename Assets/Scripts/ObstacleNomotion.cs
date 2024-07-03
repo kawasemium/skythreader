@@ -1,3 +1,10 @@
+/*========================================
+
+    public class ObstacleNomotion
+        不動の立方体の障害物に持たせるクラスです。
+
+========================================*/
+
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;

@@ -1,9 +1,28 @@
+/*========================================
+
+    static class Config
+        ゲームバランスの設定と読み取りを担当します。
+
+    static class Records
+        操作説明を表示したことがあるかどうかを保持します。
+
+    public class General
+        空のゲームオブジェクトに持たせたクラスで、
+        大方の機能がこちらにあります。
+
+    public class ObstacleBase
+        全ての障害物が共通で持つ機能をまとめたクラスです。
+        これだけでは動かないため、継承先で動きを指定して動かします。
+
+========================================*/
+
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 using Unity.VisualScripting;
 using UnityEngine.SceneManagement;
+
 
 //ゲームバランスの設定
 static class Config{
@@ -205,9 +224,6 @@ public class General:MonoBehaviour
 
         //Debug
         if(Input.GetKeyDown(KeyCode.Q))LevelUp();
-    }
-    void StartGame(){
-
     }
     void LevelUp(){
         if(level==Config.MaxLevel)return;
