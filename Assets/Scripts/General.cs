@@ -222,8 +222,6 @@ public class General:MonoBehaviour
 
         tex.text=text;
 
-        //Debug
-        if(Input.GetKeyDown(KeyCode.Q))LevelUp();
     }
     void LevelUp(){
         if(level==Config.MaxLevel)return;
