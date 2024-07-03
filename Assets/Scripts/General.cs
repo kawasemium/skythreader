@@ -2,12 +2,91 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
+using Unity.VisualScripting;
+using UnityEngine.SceneManagement;
 
-//変数は最初小文字、関数やクラスは最初大文字で統一
+//ゲームバランスの設定
+static class Config{
+    static float turnSpeed=0.8f;//プレイヤーの曲がりやすさ ~1.0
+    static float accelBy=0.5f;//加速の度合い
+    static float maxGameSpeed=70.0f;//加速時の進む速度
+    static float minGameSpeed=24.0f;//普段の進む速度
+    static float maxSpeedBonusRate=5.0f;//最高速時のスコアボーナス倍率
+    static float maxObstacleInterval=0.22f;//障害物が生成される間隔
+    static float minObstacleInterval=0.18f;
+    static float maxObstacleScale=4.1f;//最も大きい障害物のスケール
+    static int maxLevel=5;//最大レベル
+    static float levelInterval=15.0f;//レベルが上がるまでの秒数
+
+    public static float TurnSpeed
+    {
+        get{
+            return turnSpeed;
+        }
+    }
+    public static float AccelBy
+    {
+        get{
+            return accelBy;
+        }
+    }
+    public static float MaxGameSpeed
+    {
+        get{
+            return maxGameSpeed;
+        }
+    }
+    public static float MinGameSpeed
+    {
+        get{
+            return minGameSpeed;
+        }
+    }
+    public static float MaxSpeedBonusRate
+    {
+        get{
+            return maxSpeedBonusRate;
+        }
+    }
+    public static float MaxObstacleInterval
+    {
+        get{
+            return maxObstacleInterval;
+        }
+    }
+    public static float MinObstacleInterval
+    {
+        get{
+            return minObstacleInterval;
+        }
+    }
+    public static float MaxObstacleScale
+    {
+        get{
+            return maxObstacleScale;
+        }
+    }
+    public static int MaxLevel
+    {
+        get{
+            return maxLevel;
+        }
+    }
+    public static float LevelInterval
+    {
+        get{
+            return levelInterval;
+        }
+    }
+}
+static class Records{
+    public static bool first=false;
+}
+
 
 public class General:MonoBehaviour
 {
-    [SerializeField] TextMeshProUGUI tex; 
+    [SerializeField] TextMeshProUGUI tex;
     GameObject bird;
     GameObject player;
     Player playerScript;
@@ -17,16 +96,12 @@ public class General:MonoBehaviour
     float createObstacleInterval;
     float createObstacleWaiting;
 
-    [SerializeField] float maxGameSpeed;
-    [SerializeField] float minGameSpeed;
     [SerializeField] float speed;
-    //float minSpeed;
-    int level;//1~5
-    int maxLevel;
-    float startTime;
-    float levelInterval;//levelup(s)
+    int level;
+    int score;
+    float sceneTime;
     bool playAble;
-    int result;
+    bool tutorial;
 
     void Start()
     {
@@ -38,31 +113,47 @@ public class General:MonoBehaviour
         createObstacleInterval = 1;//s
         createObstacleWaiting = 0;
 
-        maxGameSpeed=16.0f;
-        minGameSpeed=10.0f;
-        speed=minGameSpeed;
+        speed=Config.MinGameSpeed;
         level=1;
-        maxLevel=5;
-        startTime=Time.time;
-        levelInterval=20.0f;
-        playAble=true;
-        result=0;
-
+        score=0;
+        sceneTime=0;
         CalcCrossSection();
+
+        if(Records.first){
+            playAble=true;
+            return;
+        }
+        tutorial=true;
+        tex.text="W/A/S/D to move\nSpace to accelarate(+bonus)\n\nOK? [Space]";
+        Records.first=false;
+
     }
     void Update()
     {
-        CalcInterval();
-
-        if(!playAble){
-            speed-=0.2f;
-            if(speed<0)speed=0;
+        //チュートリアル中
+        if(tutorial){
+            if(Input.GetKey(KeyCode.Space)){
+                tutorial=false;
+                playAble=true;
+            }
             return;
         }
+        
+        //障害物生成間隔の調整
+        float mitv=Config.MinObstacleInterval,Mitv=Config.MaxObstacleInterval;
+        int Mle=Config.MaxLevel;
+        createObstacleInterval=mitv+(Mitv-mitv)/Mle*(Mle-level);
+        float baisoku=speed/Config.MinGameSpeed;
+        createObstacleInterval*=(1/baisoku);
 
-        tex.text=
-        "Level: "+level+" /"+maxLevel;
+        //ゲームオーバー時処理
+        if (!playAble){
+            if(Input.GetKey(KeyCode.R))SceneManager.LoadScene("Scene1");
 
+            if(speed==0)return;
+        }
+
+        //障害物生成
         createObstacleWaiting += Time.deltaTime;
         if (createObstacleWaiting >= createObstacleInterval)
         {
@@ -74,14 +165,52 @@ public class General:MonoBehaviour
             CreateObstacle(name);
             createObstacleWaiting -= createObstacleInterval;
         }
+        
+        //やられてから完全に止まるまで
+        if(!playAble){
+            if(speed>Config.MinGameSpeed)speed*=0.75f;
+            else speed-=0.2f;
+            if(speed<0)speed=0;
+            return;
+        }
 
-        if(Time.time-startTime>levelInterval*level && level<maxLevel)LevelUp();
+        //レベルアップ
+        sceneTime+=Time.deltaTime;
+        if(sceneTime>Config.LevelInterval*level){
+            LevelUp();
+        }
 
+        //加速
+        if (Input.GetKey(KeyCode.Space))Speed=Config.AccelBy;
+        else Speed=-1.0f;
 
-        //Delete this
+        //テキスト更新
+        string text="Level: "+level+" /"+Config.MaxLevel+"\nScore: ";
+        int plus=(int)(Time.deltaTime*100);
+        float min=Config.MinGameSpeed;
+        if(speed>min){
+            float rate=(speed-min)/(Config.MaxGameSpeed-min);
+            float mag=(Config.MaxSpeedBonusRate-1.0f)*rate+1.0f;
+            mag=(int)(mag*10);
+            mag=(float)(mag/10);
+            plus=(int)(plus*mag);
+            score+=plus;
+            text+=score+" x"+mag;
+        }else{
+            score+=plus;
+            text+=score;
+        }
+
+        tex.text=text;
+
+        //Debug
         if(Input.GetKeyDown(KeyCode.Q))LevelUp();
     }
+    void StartGame(){
+
+    }
     void LevelUp(){
+        if(level==Config.MaxLevel)return;
         level++;
     }
     void CalcCrossSection()
@@ -91,15 +220,7 @@ public class General:MonoBehaviour
         cameraScreen[1] = 100*fov/3/2;
         cameraScreen[2] = ca.farClipPlane;
     }
-    void CalcInterval()
-    {
-        if(speed>=17){
-            Debug.Log("speed >= 17");
-            return;
-        }
-        createObstacleInterval=(17-speed)/15;
-        //sp=-15interval+18
-    }
+
     void CreateObstacle(string name)
     {
         GameObject gb = Resources.Load(name) as GameObject;
@@ -110,8 +231,15 @@ public class General:MonoBehaviour
         Vector3 p = new Vector3(x, y, z);
         GameObject pf=Instantiate(gb);
         pf.transform.position = p;
-        pf.transform.localScale*=Random.Range(1,level+1);
+
+        float ms=Config.MaxObstacleScale;
+        float mins=(float)(level-1)/(float)Config.MaxLevel*ms;
+        if(mins==1)mins=1;
+        float s=(Random.value*((ms-mins)*((float)level/(float)Config.MaxLevel)))+mins;
+        //Debug.Log(s);
+        pf.transform.localScale*=s;
     }
+    
     public float Speed
     {
         get{
@@ -119,19 +247,15 @@ public class General:MonoBehaviour
         }
         set
         {
+            float max=Config.MaxGameSpeed;
+            float min=Config.MinGameSpeed;
 
             float s=speed+value;
-            if(s>=minGameSpeed && s<=maxGameSpeed){
-                speed += value;
-            }
-            if(Mathf.Abs(maxGameSpeed-speed)<1)speed=maxGameSpeed;
-            if(Mathf.Abs(minGameSpeed-speed)<1)speed=minGameSpeed;
+            if(s>max)s=max;
+            if(s<min)s=min;
+
+            speed=s;
         }
-    }
-    public float MinGameSpeed{
-            get{
-                return minGameSpeed;
-            }
     }
 
     public bool PlayAble{
@@ -141,16 +265,12 @@ public class General:MonoBehaviour
     }
     public void GameOver(){
         playAble=false;
+        Records.first=true;
         var birdRigid=bird.GetComponent<Rigidbody>();
         birdRigid.useGravity=true;
         birdRigid.AddTorque(Vector3.right*80.0f);
         birdRigid.AddTorque(Vector3.back*500.0f);
-        result=(int)Time.time-(int)startTime;
-        result*=100;
-
-        tex.text=
-        "Level: "+level+" /"+maxLevel+"\n"+
-        "Score: "+result;
+        tex.text="Level: "+level+" /"+Config.MaxLevel+"\nScore: "+score+"\n\n[R] Try Again?";
     }
 }
 
@@ -174,7 +294,7 @@ public class ObstacleBase : MonoBehaviour
         backScreen = GameObject.Find("Main Camera").transform.position.z;
         flowSpeed = general.Speed;
 
-        rotateSpeed=Random.Range(30,50);
+        rotateSpeed=Random.Range(40,75);
         angle=transform.localEulerAngles;
     }
 
@@ -182,17 +302,16 @@ public class ObstacleBase : MonoBehaviour
     {
         flowSpeed= general.Speed;
         float[] deg=playerScript.Degree;
-        float handle=0.8f;
 
         Vector3 p=transform.position;
-        p.x-=deg[0]*handle;
-        p.y-=deg[1]*handle;
+        p.x-=deg[0]*Config.TurnSpeed;
+        p.y-=deg[1]*Config.TurnSpeed;
         p.z-=flowSpeed;
         transform.position=p;
 
         if (gameObject.transform.position.z < backScreen)
         {
-            DestroyMe();
+            Destroy(gameObject);
         }
     }
     protected void RandomAngle(){
@@ -208,11 +327,5 @@ public class ObstacleBase : MonoBehaviour
     {
         angle.x+=rotateSpeed*Time.deltaTime;
         transform.eulerAngles=angle;
-    }
-
-
-    protected void DestroyMe()
-    {
-        Destroy(gameObject);
     }
 }

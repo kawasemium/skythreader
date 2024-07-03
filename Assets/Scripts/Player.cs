@@ -47,8 +47,6 @@ public class Player : MonoBehaviour
         if (Input.GetKey(KeyCode.D))verticalDegree++;
         if (Input.GetKey(KeyCode.A))verticalDegree--;
 
-        if (Input.GetKey(KeyCode.LeftShift))general.Speed=1.0f;
-        else general.Speed=-1.0f;
         
         if(horizontalDegree>maxDegree)horizontalDegree=maxDegree;
         if(horizontalDegree<-maxDegree)horizontalDegree=-maxDegree;
@@ -75,7 +73,7 @@ public class Player : MonoBehaviour
         bool josho=false;
         if(horizontalDegree>0)josho=true;
         bool accel=false;
-        if(general.Speed>general.MinGameSpeed)accel=true;
+        if(general.Speed>Config.MinGameSpeed)accel=true;
 
         if((josho || accel)&& !isFlapping){
             animator.CrossFade("Flapping|Action",0,-1);
