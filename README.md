@@ -5,6 +5,14 @@
 ### ゲームのURL
 [SkyThreader(unityroom)](https://unityroom.com/games/skythreader)
 
+(※PCのみ、WebGL)
+
+<br>
+
+---
+### ゲームの説明、操作方法
+ゲームのページの「ゲーム紹介」に記載しています。
+
 <br>
 
 ---
