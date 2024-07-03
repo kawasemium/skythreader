@@ -28,7 +28,7 @@
 [[Assets]フォルダ > [Scripts]フォルダ](./Assets/Scripts) にスクリプトがあります。
 
 各スクリプトの先頭部分に説明があります。以下は概要です。
-- General.cs: ほとんどのコードをこちらに記載しています。
+- General.cs: メインのスクリプトです。
 - Player.cs: プレイヤーに持たせるスクリプトです。
 - ObstacleNomotion.cs: 動かない障害物に持たせるスクリプトです。
 - ObstacleRotate.cs: 回転する障害物に持たせるスクリプトです。
